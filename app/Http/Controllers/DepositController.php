@@ -16,6 +16,7 @@ use App\Models\Zone;
 use App\Models\Account;
 use App\Models\CharBase;
 use App\Models\AccountLogs;
+use App\Models\BuyPackageLogs;
 use App\Helper\Util;
 
 class DepositController extends APIController
@@ -26,6 +27,10 @@ class DepositController extends APIController
      * @param  int  $id
      * @return \Illuminate\View\View
      */
+    const MUA_HANG_TUAN = 1;
+    const MUA_MOT_LAN = 2;
+    const MUA_KHONG_GIOI_HAN = 0;
+
     public function getList(Request $request)
     {        
         return TableDeposit::get();
@@ -85,10 +90,57 @@ class DepositController extends APIController
                         $paykey = '$D#&@r!@#$%^&o#$@#!$@#DW';
 
                         $itemID = $itemInfo['ItemID'];
+                        $buyType = $itemInfo['BuyType'];
                         $time = time();
                         $str = $paykey.$time.$input['serverid'];
                         $sign =	sha1($str,false);
                         $order 		= strtoupper(md5(uniqid(rand(),true)));
+
+                        switch($buyType) {
+                            case self::MUA_HANG_TUAN:
+                                $weekStartDate = Carbon::now()->startOfWeek();
+                                $weekEndDate = Carbon::now()->endOfWeek();
+
+                                $whereBuyPkg = [
+                                    'ItemID'    => $itemID,
+                                    'BuyType'   => $buyType,
+                                    'charid'    => $input['charid'],
+                                    'zoneid'    => $input['serverid'],
+                                    'account'   => $userInfo['account'],
+                                    'accid'     => $accountInfo['id'],
+                                ];
+
+                                $countBuyPKG = BuyPackageLogs::where($whereBuyPkg)
+                                                        ->whereBetween('time', [$weekStartDate, $weekEndDate])
+                                                        ->count();
+                                if($countBuyPKG > 0) {
+                                    return ['error', 'You bought this package this week, please buy it next week!'];
+                                    die();
+                                }
+                                break;
+                            case self::MUA_MOT_LAN:
+
+                                $whereBuyPkg = [
+                                    'ItemID'    => $itemID,
+                                    'BuyType'   => $buyType,
+                                    'charid'    => $input['charid'],
+                                    'zoneid'    => $input['serverid'],
+                                    'account'   => $userInfo['account'],
+                                    'accid'     => $accountInfo['id'],
+                                ];
+
+                                $countBuyPKG = BuyPackageLogs::where($whereBuyPkg)
+                                                        ->count();
+                                if($countBuyPKG > 0) {
+                                    return ['error', 'You bought this package once, you can\'t buy it anymore!'];
+                                    die();
+                                }
+                                break;
+                            case self::MUA_KHONG_GIOI_HAN:
+                                break;
+                            default:
+                                break;
+                        }
 
                         $p_data = array(
                             "time"		=>  $time,
@@ -115,6 +167,19 @@ class DepositController extends APIController
                                 'zoneid'      => $input['serverid'],
                                 'type'        =>'buy_package'
                             ];
+
+                            $buyPackageLogs = [
+                                'account'       => $accountInfo['account'],
+                                'account_email' => $accountInfo['email'],
+                                'account_id'    => $accountInfo['id'],
+                                'time'          => Carbon::now(),
+                                'charid'        => $input['charid'],
+                                'zoneid'        => $input['serverid'],
+                                'ItemID'        => $itemInfo['ItemID'],
+                                'BuyType'       => $itemInfo['BuyType']
+                            ];
+
+                            BuyPackageLogs::insert($buyPackageLogs);
                             AccountLogs::insert($accountLogsData);
                             Account::where($where)->decrement('money', $itemInfo['Price']);
                             return ['success'];
