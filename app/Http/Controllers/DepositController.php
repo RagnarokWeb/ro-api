@@ -107,7 +107,7 @@ class DepositController extends APIController
                                     'charid'    => $input['charid'],
                                     'zoneid'    => $input['serverid'],
                                     'account'   => $userInfo['account'],
-                                    'accid'     => $accountInfo['id'],
+                                    'account_id'=> $accountInfo['id'],
                                 ];
 
                                 $countBuyPKG = BuyPackageLogs::where($whereBuyPkg)
@@ -126,7 +126,7 @@ class DepositController extends APIController
                                     'charid'    => $input['charid'],
                                     'zoneid'    => $input['serverid'],
                                     'account'   => $userInfo['account'],
-                                    'accid'     => $accountInfo['id'],
+                                    'account_id'=> $accountInfo['id'],
                                 ];
 
                                 $countBuyPKG = BuyPackageLogs::where($whereBuyPkg)
