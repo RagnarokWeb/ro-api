@@ -23,10 +23,12 @@ class ZoneController extends APIController
     public function getList(Request $request)
     {
         $column = [
-            'regionid',
-            'nickname'
+            'region.regionid',
+            'region.nickname',
+            'zone.zonename',
+            'zone.zoneid'
         ];
         
-        return Region::get($column);
+        return Region::leftJoin('zone', 'zone.regionid', '=', 'region.regionid')->get($column);
     }
 }
