@@ -24,8 +24,7 @@ class ZoneController extends APIController
     {
         $column = [
             'regionid',
-            'zoneid',
-            'zonename'
+            'nickname'
         ];
         
         return Zone::get($column);
