@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\APIController;
 // use App\Models\User;
-use App\Models\Zone;
+use App\Models\Region;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
@@ -27,6 +27,6 @@ class ZoneController extends APIController
             'nickname'
         ];
         
-        return Zone::get($column);
+        return Region::get($column);
     }
 }
