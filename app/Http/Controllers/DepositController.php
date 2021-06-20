@@ -86,8 +86,9 @@ class DepositController extends APIController
                 }
                 if(!empty($itemInfo)) {
                     try {
-                        $domain = "http://103.92.25.253:5559/charge";
-                        $paykey = '$D#&@r!@#$%^&o#$@#!$@#DW';
+                        // $domain = "http://103.92.25.253:5559/charge";
+                        $domain = (string)env('DOMAIN_BUY_PACKAGE', null);
+                        $paykey = (string)env('PAY_KEY', null);
 
                         $itemID = $itemInfo['ItemID'];
                         $buyType = $itemInfo['BuyType'];
