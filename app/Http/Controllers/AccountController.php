@@ -28,7 +28,7 @@ class AccountController extends APIController
      */
     public function forgotPassword(Request $request) {
         $input = collect($request->validate([
-            'account' => 'required|min:4|max:60|regex:/^[a-zA-Z0-9\_\.]{4,60}$/i',
+            'account' => 'required|min:4|max:10|regex:/^[a-zA-Z0-9\_\.@]{4,10}$/i',
             'email' => 'required|email',
         ]))->only('account', 'email')->toArray();
 
@@ -229,8 +229,8 @@ class AccountController extends APIController
 
     public function changePassword(Request $request) {
         $input = collect($request->validate([
-            'oldpassword' => 'required|min:1|max:60',
-            'newpassword' => 'required|min:1|max:60',
+            'oldpassword' => 'required|min:4|max:10|regex:/^[a-zA-Z0-9\_\.@]{4,10}$/i',
+            'newpassword' => 'required|min:4|max:10|regex:/^[a-zA-Z0-9\_\.@]{4,10}$/i'
         ]))->only('oldpassword', 'newpassword')->toArray();
         $oldPassword = md5($input['oldpassword']);
         $newPassword = md5($input['newpassword']);

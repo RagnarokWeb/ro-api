@@ -24,8 +24,8 @@ class AuthController extends APIController
     public function login(Request $request)
     {
         $input = collect($request->validate([
-            'account' => 'required|min:3|max:60|regex:/^[a-zA-Z0-9\_\.@]{3,60}$/i',
-            'password' => 'required|min:1|max:60'
+            'account' => 'required|min:4|max:10|regex:/^[a-zA-Z0-9\_\.@]{4,10}$/i',
+            'password' => 'required|min:4|max:10|regex:/^[a-zA-Z0-9\_\.@]{4,10}$/i',
         ]))->only('account', 'password')->toArray();
 
         $input['password'] = md5($input['password']);
@@ -60,8 +60,8 @@ class AuthController extends APIController
     public function register(Request $request)
     {
         $input = collect($request->validate([
-            'account' => 'required|min:4|max:60|regex:/^[a-zA-Z0-9\_\.]{4,60}$/i',
-            'password' => 'required|min:1|max:60',
+            'account' => 'required|min:4|max:10|regex:/^[a-zA-Z0-9\_\.@]{4,10}$/i',
+            'password' => 'required|min:4|max:10|regex:/^[a-zA-Z0-9\_\.@]{4,10}$/i',
             'email' => 'required|email',
         ]))->only('account', 'password', 'email')->toArray();
         
