@@ -1,5 +1,3 @@
 #Install
-
-1. Install composer to your environment
-2. run command : composer install
-2. run command : php artisan jwt:secret
+1. chạy lệnh : cp .env.example .env
+2. config file .env
