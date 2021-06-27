@@ -94,6 +94,8 @@ class GiftCodeController extends APIController
                                 $whereBuyPkg = [
                                     'ItemID'    => $itemID,
                                     'BuyType'   => $buyType,
+                                    'charid'    => $input['charid'],
+                                    'zoneid'    => $input['serverid'],
                                     // 'code'    => $input['code']
                                 ];
 
