@@ -72,9 +72,6 @@ class GiftCodeController extends APIController
             if(!empty($zoneInfo)) {
                 $itemInfo = GiftCode::where('code', $input['code'])->first();
                 $checkCodeUsed = GiftCodeLogs::where('code', $input['code'])->count();
-                if($checkCodeUsed > 0) {
-                    return ['error', 'You had inputed used code!'];
-                }
                 
                 if(!empty($itemInfo)) {
                     try {
@@ -91,7 +88,9 @@ class GiftCodeController extends APIController
 
                         switch($buyType) {
                             case self::CODE_RIENG:
-
+                                if($checkCodeUsed > 0) {
+                                    return ['error', 'You had inputed used code!'];
+                                }
                                 $whereBuyPkg = [
                                     'ItemID'    => $itemID,
                                     'BuyType'   => $buyType,
