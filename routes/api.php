@@ -51,3 +51,7 @@ Route::group(['prefix' => 'account'], function () {
     Route::post('changeEmail', 'AccountController@changeEmail');
     Route::post('changePassword', 'AccountController@changePassword');
 }); 
+
+Route::group(['prefix' => 'giftcode'], function () {
+    Route::post('checkCode', 'DepositController@checkCode');
+}); 
