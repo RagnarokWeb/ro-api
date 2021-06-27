@@ -33,24 +33,13 @@ class GiftCodeController extends APIController
     const CODE_RIENG = 2;
     const MUA_KHONG_GIOI_HAN = 0;
 
-    public function getList(Request $request)
-    {        
-        return TableDeposit::get();
-    }
-
-    public function getTypeList(Request $request)
-    {        
-        return DepositType::get();
-    }
-
     public function checkCode(Request $request)
     {        
         $input = collect($request->validate([
             'charid' => 'required|min:3|max:60|regex:/^[\d]{3,60}$/i',
-            'currency' => 'required|min:1|max:60|regex:/^[\d]{1,60}$/i',
             'serverid' => 'required|min:1|max:60|regex:/^[\d]{1,60}$/i',
-            'code' => 'required|min:1|max:60|regex:/^[a-z0-9\_\.@]{1,60}$/'
-        ]))->only('charid', 'currency', 'serverid', 'code')->toArray();
+            'code' => 'required|min:1|max:60|regex:/^[A-Za-z0-9\-\_\.@]{1,60}$/'
+        ]))->only('charid', 'serverid', 'code')->toArray();
 
         $userInfo = Util::validateToken($request);
         if(!$userInfo) {
@@ -82,9 +71,11 @@ class GiftCodeController extends APIController
             $zoneInfo = Zone::where('regionid', $input['serverid'])->first();
             if(!empty($zoneInfo)) {
                 $itemInfo = GiftCode::where('code', $input['code'])->first();
-                if(empty($itemInfo['Code'])) {
-                    return ['error', 'You had inputed wrong giftcode!'];
+                $checkCodeUsed = GiftCodeLogs::where('code', $input['code'])->count();
+                if($checkCodeUsed > 0) {
+                    return ['error', 'You had inputed used code!'];
                 }
+                
                 if(!empty($itemInfo)) {
                     try {
                         // $domain = "http://103.92.25.253:5559/charge";
@@ -104,12 +95,12 @@ class GiftCodeController extends APIController
                                 $whereBuyPkg = [
                                     'ItemID'    => $itemID,
                                     'BuyType'   => $buyType,
-                                    'code'    => $input['code']
+                                    // 'code'    => $input['code']
                                 ];
 
                                 $countBuyPKG = GiftCodeLogs::where($whereBuyPkg)->count();
                                 if($countBuyPKG > 0) {
-                                    return ['error', 'GiftCode has been used before!'];
+                                    return ['error', 'You had received this code!'];
                                     die();
                                 }
                                 break;
@@ -122,7 +113,7 @@ class GiftCodeController extends APIController
                                     'zoneid'    => $input['serverid'],
                                     'account'   => $userInfo['account'],
                                     'account_id'=> $accountInfo['id'],
-                                    'code' => $input['code']
+                                    // 'code'      => $input['code']
                                 ];
 
                                 $countBuyPKG = GiftCodeLogs::where($whereBuyPkg)
@@ -173,12 +164,12 @@ class GiftCodeController extends APIController
                                 'zoneid'        => $input['serverid'],
                                 'ItemID'        => $itemInfo['ItemID'],
                                 'BuyType'       => $itemInfo['BuyType'],
-                                'code'          => $input['code']
+                                'code'          => $input['code'],
                             ];
 
                             GiftCodeLogs::insert($buyPackageLogs);
                             AccountLogs::insert($accountLogsData);
-                            Account::where($where)->decrement('money', $itemInfo['Price']);
+                            // Account::where($where)->decrement('money', $itemInfo['Price']);
                             return ['success'];
                         }else {
                             return ['error', $res->message];
@@ -186,7 +177,8 @@ class GiftCodeController extends APIController
                     } catch(Exception $e) {
                         return ['error', 'Connection to game-server failed!'];
                     }
-                    
+                } else {
+                    return ['error', 'You had inputed wrong code!'];
                 }
             }
             return [];

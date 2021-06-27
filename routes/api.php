@@ -53,5 +53,5 @@ Route::group(['prefix' => 'account'], function () {
 }); 
 
 Route::group(['prefix' => 'giftcode'], function () {
-    Route::post('checkCode', 'DepositController@checkCode');
+    Route::post('checkCode', 'GiftCodeController@checkCode');
 }); 
