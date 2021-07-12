@@ -81,6 +81,7 @@ class GiftCodeController extends APIController
 
                         $itemID = $itemInfo['ItemID'];
                         $buyType = $itemInfo['BuyType'];
+                        $giftID = $itemInfo['GiftID'];
                         $time = time();
                         $str = $paykey.$time.$input['serverid'];
                         $sign =	sha1($str,false);
@@ -96,7 +97,8 @@ class GiftCodeController extends APIController
                                     'BuyType'   => $buyType,
                                     'charid'    => $input['charid'],
                                     'zoneid'    => $input['serverid'],
-                                    // 'code'    => $input['code']
+                                    // 'code'   => $input['code']
+                                    'GiftID'    => $giftID
                                 ];
 
                                 $countBuyPKG = GiftCodeLogs::where($whereBuyPkg)->count();
@@ -114,7 +116,8 @@ class GiftCodeController extends APIController
                                     'zoneid'    => $input['serverid'],
                                     'account'   => $userInfo['account'],
                                     'account_id'=> $accountInfo['id'],
-                                    // 'code'      => $input['code']
+                                    // 'code'      => $input['code'],
+                                    'GiftID'    => $giftID
                                 ];
 
                                 $countBuyPKG = GiftCodeLogs::where($whereBuyPkg)
