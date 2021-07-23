@@ -43,6 +43,8 @@ Route::group(['prefix' => 'deposit'], function () {
 Route::group(['prefix' => 'payment'], function () {
     Route::get('getPaypalConfig', 'PaymentController@getPaypalConfig');
     Route::post('processPayment', 'PaymentController@processPayment');
+    Route::get('getChargeConfig', 'PaymentController@getChargeConfig');
+    Route::post('paymentHoldCharge', 'PaymentController@paymentHoldCharge');
 }); 
 
 Route::group(['prefix' => 'account'], function () {

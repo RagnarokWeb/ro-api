@@ -169,6 +169,7 @@ class GiftCodeController extends APIController
                                 'ItemID'        => $itemInfo['ItemID'],
                                 'BuyType'       => $itemInfo['BuyType'],
                                 'code'          => $input['code'],
+                                'GiftID'        => $giftID
                             ];
 
                             GiftCodeLogs::insert($buyPackageLogs);

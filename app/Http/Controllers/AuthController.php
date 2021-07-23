@@ -23,11 +23,17 @@ class AuthController extends APIController
      */
     public function login(Request $request)
     {
-        $input = collect($request->validate([
+        $input = $request->only('account', 'password');
+        
+        $validator = Validator::make($input, [
             'account' => 'required|min:4|max:10|regex:/^[a-z0-9\_\.@]{4,10}$/',
             'password' => 'required|min:4|max:10|regex:/^[a-z0-9\_\.@]{4,10}$/',
-        ]))->only('account', 'password')->toArray();
+        ]);
 
+        if ($validator->fails()) {
+            return ['error', 'Username and password must be lowercase and not longer than 10 characters!'];
+        }
+        
         $input['password'] = md5($input['password']);
 
         $orWhere = [
@@ -59,11 +65,17 @@ class AuthController extends APIController
 
     public function register(Request $request)
     {
-        $input = collect($request->validate([
+        $input = $request->only('account', 'password', 'email');
+        
+        $validator = Validator::make($input, [
             'account' => 'required|min:4|max:10|regex:/^[a-z0-9\_\.@]{4,10}$/',
             'password' => 'required|min:4|max:10|regex:/^[a-z0-9\_\.@]{4,10}$/',
             'email' => 'required|email',
-        ]))->only('account', 'password', 'email')->toArray();
+        ]);
+
+        if ($validator->fails()) {
+            return ['error', 'Username and password must be lowercase and not longer than 10 characters!'];
+        }
         
         $findAccountCount = Account::where('account', $input['account'])->count();
         if($findAccountCount > 0) {

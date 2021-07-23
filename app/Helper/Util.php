@@ -73,4 +73,9 @@ class Util{
         $signature = base64_encode($signature); 
         return $signature == $clientSignature;
     }
+    
+    static function calcutePaypal($money) {
+        $calculated = (float)round((float)$money - (float)((float)(0.044 * (float)$money) + 0.3), 2);//phí ngoài nước 4.4% + 0.3$
+        return $calculated;
+    }
 }

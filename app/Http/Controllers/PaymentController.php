@@ -19,6 +19,8 @@ use App\Models\AccountLogs;
 use App\Models\PaymentLogs;
 use App\Services\PaypalService;
 use App\Helper\Util;
+use App\Models\ChargeConfig;
+use App\Models\ChargeCustomLogs;
 
 class PaymentController extends APIController
 {
@@ -58,6 +60,11 @@ class PaymentController extends APIController
         else {
             return ['error', 'token_expired'];
         }
+    }
+    
+    public function getChargeConfig(Request $request)
+    {        
+        return ChargeConfig::get()->groupBy('region');
     }
 
     public function processPayment(Request $request)
@@ -132,6 +139,7 @@ class PaymentController extends APIController
                     'card_type'     => 'Paypal',
                     'status'        => $state,
                     'money'         => $paidAmount, 
+                    'money_thuc_nhan' => Util::calcutePaypal($paidAmount),
                     'account_id'    => $accountInfo['id'],
                     'account'       => $accountInfo['account'],
                     'account_email' => $accountInfo['email'],
@@ -146,6 +154,116 @@ class PaymentController extends APIController
                 return $data;
             } else {
                 return ['error', 'payment_not_approved'];
+            }
+        }
+        else {
+            return ['error', 'token_expired'];
+        }
+    }
+    
+    public function paymentHoldCharge(Request $request)
+    {        
+        $input = $request->all();
+        $chargeConfigId = $input['chargeId'];
+        $amount = $input['amount'];
+        if(!is_numeric($chargeConfigId)) return ['error', 'Your information not accepted!'];
+        if(!is_numeric($amount) || intval($amount) <= 0) return ['error', 'Amount must be a numeric!'];
+        $userInfo = Util::validateToken($request);
+        if(!$userInfo) {
+            return ['error', 'token_expired'];
+        }
+
+        $where = [
+            'account'     => $userInfo['account'],
+        ];
+        
+        $accountInfo = Account::where($where)->first();
+        if(!empty($accountInfo)) {
+            $chargeLogsWhere = [
+                'accid' => $accountInfo['id'],
+                'account' => $accountInfo['account'],
+                'status' => 0
+            ];
+            
+            $countCharge = ChargeCustomLogs::where($chargeLogsWhere)->count();
+            
+            if($countCharge >= 3) {
+                return ['error', 'You have 3 or more pending charge session, please wait for them!'];
+            }
+            
+            $chargeConfig = ChargeConfig::where('id', $chargeConfigId)->first();
+            if(!empty($chargeConfig)) {
+                $chargeConfig['list_component'] = !empty($chargeConfig['list_component']) ?  json_decode($chargeConfig['list_component'], true) : [];
+                $chargeConfig['component_config'] = !empty($chargeConfig['component_config']) ?  json_decode($chargeConfig['component_config'], true) : [];
+                $inputSave = [];
+                foreach($chargeConfig['list_component'] as $key => $value) {
+                    $index = explode("-",$value)[1];
+                    $componentType = explode("-",$value)[0];
+                    $componentValue = isset($input[$value]) && !empty($input[$value]) ? $input[$value] : "";
+                    $componentConfig = $chargeConfig['component_config'][$index];
+                    $saveComponentToList = false;
+                    switch($componentType) {
+                        case "Select":
+                            $optionList = explode(",", $componentConfig["option"]);
+                            if(!empty($componentValue) && !in_array($componentValue, $optionList)) {
+                                return ['error', $componentConfig["label"].'must be in ('.$componentConfig["option"].') !'];
+                            }
+                            $saveComponentToList = true;
+                            break;
+                        case "InputNumber":
+                            if(!empty($componentValue) && !is_numeric($componentValue)) {
+                                return ['error', "Can't validate ". $componentConfig["label"].' must be a numeric !'];
+                            }
+                            $saveComponentToList = true;
+                            break;
+                        case "Input":
+                            $saveComponentToList = true;
+                            break;
+                        default:
+                            break;
+                    }
+                    if($saveComponentToList) {
+                        if($componentConfig["required"] == "true" && !empty($componentValue)) {
+                            return ['error', $componentConfig["label"].' is required !'];
+                        }
+                        
+                        if($componentConfig["filter"]=="null") {
+                            array_push($inputSave, [$value => $componentValue]);
+                        } else {
+                            $filter = $componentConfig["filter"];
+                            if (!preg_match($filter,$username))
+                            {
+                             return ['error', "Can't validate ". $componentConfig["label"].' with  ('.$componentConfig["filter"].') !'];
+                            }
+                            array_push($inputSave, [$value => $componentValue]);
+                        }
+                    }
+                }
+                $chargeLogsData = [
+                    'accid' => $accountInfo['id'],
+                    'account' => $accountInfo['account'],
+                    'type_charge' => $chargeConfigId,
+                    'money' => $amount,
+                    'createdate' => Carbon::now(),
+                    'status' => 0,
+                    'otherdata' => json_encode($inputSave)
+                ];
+                
+                ChargeCustomLogs::insert($chargeLogsData);
+                
+                $accountLogsData = [
+                    'account'     => $accountInfo['account'],
+                    'log_title'   => 'Pending '. $chargeConfig['charge_title'].' recharge ...',
+                    'log_content' => "Pending recharge [" . $amount . "] USD ..." ,
+                    'log_time'    => Carbon::now(),
+                    'type'        => 'payment',
+                ];
+                
+                AccountLogs::insert($accountLogsData);
+                
+                return ['success' => 'Your payment information has been submited, server will process after few minutes!'];
+            } else {
+                return ['error', 'Your information not accepted!'];
             }
         }
         else {
