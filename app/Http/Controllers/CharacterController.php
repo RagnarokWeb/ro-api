@@ -40,7 +40,6 @@ class CharacterController extends APIController
             ];
             
             $column = [
-                'accid',
                 'charid',
                 'zoneid',
                 'name'

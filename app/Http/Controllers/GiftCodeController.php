@@ -95,10 +95,12 @@ class GiftCodeController extends APIController
                                 $whereBuyPkg = [
                                     'ItemID'    => $itemID,
                                     'BuyType'   => $buyType,
-                                    'charid'    => $input['charid'],
-                                    'zoneid'    => $input['serverid'],
+                                    // 'charid'    => $input['charid'],
+                                    // 'zoneid'    => $input['serverid'],
                                     // 'code'   => $input['code']
-                                    'GiftID'    => $giftID
+                                    'GiftID'    => $giftID,
+                                    'account'   => $userInfo['account'],
+                                    'account_id'=> $accountInfo['id'],
                                 ];
 
                                 $countBuyPKG = GiftCodeLogs::where($whereBuyPkg)->count();
@@ -112,8 +114,8 @@ class GiftCodeController extends APIController
                                 $whereBuyPkg = [
                                     'ItemID'    => $itemID,
                                     'BuyType'   => $buyType,
-                                    'charid'    => $input['charid'],
-                                    'zoneid'    => $input['serverid'],
+                                    // 'charid'    => $input['charid'],
+                                    // 'zoneid'    => $input['serverid'],
                                     'account'   => $userInfo['account'],
                                     'account_id'=> $accountInfo['id'],
                                     // 'code'      => $input['code'],
