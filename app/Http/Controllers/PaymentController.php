@@ -21,6 +21,7 @@ use App\Services\PaypalService;
 use App\Helper\Util;
 use App\Models\ChargeConfig;
 use App\Models\ChargeCustomLogs;
+use App\Models\CurrencyConfig;
 
 class PaymentController extends APIController
 {
@@ -166,8 +167,10 @@ class PaymentController extends APIController
         $input = $request->all();
         $chargeConfigId = $input['chargeId'];
         $amount = $input['amount'];
+        $currency = $input['currency'];
         if(!is_numeric($chargeConfigId)) return ['error', 'Your information not accepted!'];
         if(!is_numeric($amount) || intval($amount) <= 0) return ['error', 'Amount must be a numeric!'];
+        if(!is_numeric($currency) || intval($currency) <= 0) return ['error', 'Please choose currency!'];
         $userInfo = Util::validateToken($request);
         if(!$userInfo) {
             return ['error', 'token_expired'];
@@ -179,6 +182,19 @@ class PaymentController extends APIController
         
         $accountInfo = Account::where($where)->first();
         if(!empty($accountInfo)) {
+            $currencyConfig = CurrencyConfig::where('id', $currency)->first();
+            if(empty($currencyConfig)) {
+                return ['error', 'Cant find your currency, please choose again!'];
+            }
+            $heSoQuyDoi = $currencyConfig['he_so_quy_doi'] ? $currencyConfig['he_so_quy_doi'] : 1;
+            $regionAmount = $amount;
+            $amount = round($amount/$heSoQuyDoi,2);
+            
+            if($amount < 1) {
+                return ['error', 'You must pay at least 1 USD!'];
+            }
+            // return ['error', 'DEBUG', $amount, $regionAmount, $input];
+            
             $chargeLogsWhere = [
                 'accid' => $accountInfo['id'],
                 'account' => $accountInfo['account'],
@@ -246,7 +262,9 @@ class PaymentController extends APIController
                     'money' => $amount,
                     'createdate' => Carbon::now(),
                     'status' => 0,
-                    'otherdata' => json_encode($inputSave)
+                    'otherdata' => json_encode($inputSave),
+                    'region_money' => $regionAmount,
+                    'currency' => $currencyConfig['currency'],
                 ];
                 
                 ChargeCustomLogs::insert($chargeLogsData);
@@ -254,7 +272,7 @@ class PaymentController extends APIController
                 $accountLogsData = [
                     'account'     => $accountInfo['account'],
                     'log_title'   => 'Pending '. $chargeConfig['charge_title'].' recharge ...',
-                    'log_content' => "Pending recharge [" . $amount . "] USD ..." ,
+                    'log_content' => "Pending recharge [" . $regionAmount . "] ".$currencyConfig['currency']." (" . $amount . " USD) ..." ,
                     'log_time'    => Carbon::now(),
                     'type'        => 'payment',
                 ];
@@ -269,5 +287,10 @@ class PaymentController extends APIController
         else {
             return ['error', 'token_expired'];
         }
+    }
+    
+    public function listCurrency() 
+    {
+        return CurrencyConfig::get();
     }
 }

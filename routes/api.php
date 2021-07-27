@@ -45,6 +45,7 @@ Route::group(['prefix' => 'payment'], function () {
     Route::post('processPayment', 'PaymentController@processPayment');
     Route::get('getChargeConfig', 'PaymentController@getChargeConfig');
     Route::post('paymentHoldCharge', 'PaymentController@paymentHoldCharge');
+    Route::get('listCurrency', 'PaymentController@listCurrency');
 }); 
 
 Route::group(['prefix' => 'account'], function () {

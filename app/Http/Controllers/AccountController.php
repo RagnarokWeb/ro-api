@@ -115,7 +115,7 @@ class AccountController extends APIController
                     //insert to EmailVerificationCode and waiting for step 2.1
                     EmailVerificationCode::insert($emailForgotInfo);
                     return ['success', 'send_mail'];
-                }else {
+                } else {
                     return ['error', 'Cant send mail to ' . $input['email'] . ', please contact administrator!'];
                 }
             } else {

@@ -108,8 +108,15 @@ class AuthController extends APIController
         $where = [
             'account'     => $userInfo['account']
         ];
-
-        $accountInfo = Account::where($where)->first();
+        $columns = [
+            'account',    
+            'logintime',    
+            'email',    
+            'money',    
+            'regtime',    
+            'status' 
+        ];
+        $accountInfo = Account::where($where)->first($columns);
 
         return Util::createToken($accountInfo);
     }

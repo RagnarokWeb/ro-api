@@ -81,7 +81,7 @@ class DepositController extends APIController
             $zoneInfo = Zone::where('regionid', $input['serverid'])->first();
             if(!empty($depType) && !empty($zoneInfo)) {
                 $itemInfo = TableDeposit::where('id', $input['amount'])->first();
-                if($accountInfo['money'] < $itemInfo['Price']) {
+                if(floatval($accountInfo['money']) < floatval($itemInfo['Price'])) {
                     return ['error', 'Your account was not have enough money!'];
                 }
                 if(!empty($itemInfo)) {
