@@ -57,6 +57,9 @@ class AuthController extends APIController
                         ->first();
         if(!empty($userInfo)) {
             $userInfo = Util::createToken($userInfo);
+            if(intval($userInfo['active']) == 1) {
+                return ['error', 'account_baned'];
+            }
             return $userInfo;
         } else {
             return ['error', 'wrong_account_or_password'];
@@ -114,10 +117,14 @@ class AuthController extends APIController
             'email',    
             'money',    
             'regtime',    
-            'status' 
+            'status',
+            'active' 
         ];
         $accountInfo = Account::where($where)->first($columns);
-
+        
+        if(intval($accountInfo['active']) == 1) {
+            return ['error', 'account_baned'];
+        }
         return Util::createToken($accountInfo);
     }
 }
