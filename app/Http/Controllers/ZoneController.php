@@ -29,6 +29,6 @@ class ZoneController extends APIController
             'zone.zoneid'
         ];
         
-        return Region::leftJoin('zone', 'zone.regionid', '=', 'region.regionid')->get($column)->unique('regionid');
+        return Region::leftJoin('zone', 'zone.regionid', '=', 'region.regionid')->get($column)->unique('regionid')->values();
     }
 }

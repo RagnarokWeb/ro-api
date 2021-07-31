@@ -28,7 +28,7 @@ class AccountController extends APIController
      */
     public function forgotPassword(Request $request) {
         $input = collect($request->validate([
-            'account' => 'required|min:4|max:10|regex:/^[a-zA-Z0-9\_\.@]{4,10}$/i',
+            'account' => 'required|min:4|max:10|regex:/^[a-z0-9\_\.@]{4,10}$/',
             'email' => 'required|email',
         ]))->only('account', 'email')->toArray();
 
@@ -66,7 +66,7 @@ class AccountController extends APIController
                 //2.1 validate input
                 $validator = Validator::make($inputStep2, [
                     'code' => 'required|min:1|max:60',
-                    'password' => 'required|min:1|max:60'
+                    'password' => 'required|min:4|max:10|regex:/^[a-z0-9\_\.@]{4,10}$/',
                 ]);
 
                 if ($validator->fails()) {
@@ -123,7 +123,6 @@ class AccountController extends APIController
                 $totalDuration = Carbon::parse($emailForgotInfo['send_date'])->addMinutes(5)->diffInSeconds(Carbon::now());
                 return ['error', 'send_mail', 'Please wait ' . $totalDuration . ' seconds to resend your email!'];
             }
-            
         }
     }
 

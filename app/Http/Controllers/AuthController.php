@@ -55,6 +55,11 @@ class AuthController extends APIController
                             $query->where($orWhere);
                         })
                         ->first();
+                        
+        DB::disconnect('default');
+        DB::disconnect('global');
+        DB::disconnect('game');
+        
         if(!empty($userInfo)) {
             $userInfo = Util::createToken($userInfo);
             if(intval($userInfo['active']) == 1) {
@@ -97,6 +102,9 @@ class AuthController extends APIController
         Account::insert($input);
 
         // $input['email'] = $this->obfuscate_email($input['email']);
+        DB::disconnect('default');
+        DB::disconnect('global');
+        DB::disconnect('game');
         $input = Util::createToken($input);
         return ['success', $input];
     }
@@ -120,11 +128,14 @@ class AuthController extends APIController
             'status',
             'active' 
         ];
+        \DB::disconnect();
         $accountInfo = Account::where($where)->first($columns);
         
         if(intval($accountInfo['active']) == 1) {
             return ['error', 'account_baned'];
         }
+        
+        DB::disconnect();
         return Util::createToken($accountInfo);
     }
 }
