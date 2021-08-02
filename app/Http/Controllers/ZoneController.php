@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Cache;
 
 class ZoneController extends APIController
 {
@@ -22,13 +23,16 @@ class ZoneController extends APIController
      */
     public function getList(Request $request)
     {
-        $column = [
-            'region.regionid',
-            'region.nickname',
-            'zone.zonename',
-            'zone.zoneid'
-        ];
-        
-        return Region::leftJoin('zone', 'zone.regionid', '=', 'region.regionid')->get($column)->unique('regionid')->values();
+        $result = Cache::rememberForever('zonelist', function () {
+             $column = [
+                'region.regionid',
+                'region.nickname',
+                'zone.zonename',
+                'zone.zoneid'
+            ];
+            
+            return Region::leftJoin('zone', 'zone.regionid', '=', 'region.regionid')->get($column)->unique('regionid')->values();
+        });
+        return $result;
     }
 }

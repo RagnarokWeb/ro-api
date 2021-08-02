@@ -18,6 +18,7 @@ use App\Models\CharBase;
 use App\Models\AccountLogs;
 use App\Models\BuyPackageLogs;
 use App\Helper\Util;
+use Illuminate\Support\Facades\Cache;
 
 class DepositController extends APIController
 {
@@ -33,7 +34,11 @@ class DepositController extends APIController
 
     public function getList(Request $request)
     {        
-        return TableDeposit::get();
+        
+        $result = Cache::rememberForever('depositConfig', function () {
+            return TableDeposit::get();
+        });
+        return $result;
     }
 
     public function getTypeList(Request $request)

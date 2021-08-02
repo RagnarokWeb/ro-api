@@ -22,6 +22,7 @@ use App\Helper\Util;
 use App\Models\ChargeConfig;
 use App\Models\ChargeCustomLogs;
 use App\Models\CurrencyConfig;
+use Illuminate\Support\Facades\Cache;
 
 class PaymentController extends APIController
 {
@@ -42,7 +43,11 @@ class PaymentController extends APIController
 
     public function getPaypalConfig(Request $request)
     {        
-        return $this->paypalService->getConfig();
+        $result = Cache::rememberForever('paypalConfig', function () {
+            return $this->paypalService->getConfig();
+        });
+        return $result;
+        
 
         $userInfo = Util::validateToken($request);
         if(!$userInfo) {
@@ -65,7 +70,10 @@ class PaymentController extends APIController
     
     public function getChargeConfig(Request $request)
     {        
-        return ChargeConfig::get()->groupBy('region');
+        $result = Cache::rememberForever('chargeConfig', function () {
+            return ChargeConfig::get()->groupBy('region');
+        });
+        return $result;
     }
 
     public function processPayment(Request $request)
@@ -291,6 +299,9 @@ class PaymentController extends APIController
     
     public function listCurrency() 
     {
-        return CurrencyConfig::get();
+        $result = Cache::rememberForever('currencyConfig', function () {
+            return CurrencyConfig::get();
+        });
+        return $result;
     }
 }
