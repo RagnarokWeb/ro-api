@@ -35,10 +35,10 @@ class DepositController extends APIController
     public function getList(Request $request)
     {        
         
-        $result = Cache::rememberForever('depositConfig', function () {
+        // $result = Cache::rememberForever('depositConfig', function () {
             return TableDeposit::get();
-        });
-        return $result;
+        // });
+        // return $result;
     }
 
     public function getTypeList(Request $request)

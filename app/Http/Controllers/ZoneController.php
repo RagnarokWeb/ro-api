@@ -23,7 +23,7 @@ class ZoneController extends APIController
      */
     public function getList(Request $request)
     {
-        $result = Cache::rememberForever('zonelist', function () {
+        // $result = Cache::rememberForever('zonelist', function () {
              $column = [
                 'region.regionid',
                 'region.nickname',
@@ -32,7 +32,7 @@ class ZoneController extends APIController
             ];
             
             return Region::leftJoin('zone', 'zone.regionid', '=', 'region.regionid')->get($column)->unique('regionid')->values();
-        });
-        return $result;
+        // });
+        // return $result;
     }
 }

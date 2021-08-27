@@ -43,10 +43,10 @@ class PaymentController extends APIController
 
     public function getPaypalConfig(Request $request)
     {        
-        $result = Cache::rememberForever('paypalConfig', function () {
+        // $result = Cache::rememberForever('paypalConfig', function () {
             return $this->paypalService->getConfig();
-        });
-        return $result;
+        // });
+        // return $result;
         
 
         $userInfo = Util::validateToken($request);
@@ -70,10 +70,10 @@ class PaymentController extends APIController
     
     public function getChargeConfig(Request $request)
     {        
-        $result = Cache::rememberForever('chargeConfig', function () {
+        // $result = Cache::rememberForever('chargeConfig', function () {
             return ChargeConfig::get()->groupBy('region');
-        });
-        return $result;
+        // });
+        // return $result;
     }
 
     public function processPayment(Request $request)
@@ -211,8 +211,8 @@ class PaymentController extends APIController
             
             $countCharge = ChargeCustomLogs::where($chargeLogsWhere)->count();
             
-            if($countCharge >= 3) {
-                return ['error', 'You have 3 or more pending charge session, please wait for them!'];
+            if($countCharge >= 1) {
+                return ['error', 'You have a pending charge session, please wait for them!'];
             }
             
             $chargeConfig = ChargeConfig::where('id', $chargeConfigId)->first();
@@ -299,9 +299,9 @@ class PaymentController extends APIController
     
     public function listCurrency() 
     {
-        $result = Cache::rememberForever('currencyConfig', function () {
+        // $result = Cache::rememberForever('currencyConfig', function () {
             return CurrencyConfig::get();
-        });
-        return $result;
+        // });
+        // return $result;
     }
 }
